@@ -11,6 +11,7 @@
 
 package io.vertx.core;
 
+import io.vertx.core.eventbus.EventBusOptions;
 import io.vertx.core.file.FileSystemOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.MetricsOptions;
@@ -33,7 +34,7 @@ public class VertxOptionsTest extends VertxTestBase {
   @Test
   public void testOptions() {
     VertxOptions options = new VertxOptions();
-    assertEquals(2 * Runtime.getRuntime().availableProcessors(), options.getEventLoopPoolSize());
+    assertEquals(VertxOptions.DEFAULT_EVENT_LOOP_POOL_SIZE, options.getEventLoopPoolSize());
     int rand = TestUtils.randomPositiveInt();
     assertEquals(options, options.setEventLoopPoolSize(rand));
     assertEquals(rand, options.getEventLoopPoolSize());
@@ -43,7 +44,7 @@ public class VertxOptionsTest extends VertxTestBase {
     } catch (IllegalArgumentException e) {
       // OK
     }
-    assertEquals(20, options.getWorkerPoolSize());
+    assertEquals(VertxOptions.DEFAULT_WORKER_POOL_SIZE, options.getWorkerPoolSize());
     rand = TestUtils.randomPositiveInt();
     assertEquals(options, options.setWorkerPoolSize(rand));
     assertEquals(rand, options.getWorkerPoolSize());
@@ -53,7 +54,7 @@ public class VertxOptionsTest extends VertxTestBase {
     } catch (IllegalArgumentException e) {
       // OK
     }
-    assertEquals(20, options.getInternalBlockingPoolSize());
+    assertEquals(VertxOptions.DEFAULT_INTERNAL_BLOCKING_POOL_SIZE, options.getInternalBlockingPoolSize());
     rand = TestUtils.randomPositiveInt();
     assertEquals(options, options.setInternalBlockingPoolSize(rand));
     assertEquals(rand, options.getInternalBlockingPoolSize());
@@ -63,7 +64,7 @@ public class VertxOptionsTest extends VertxTestBase {
     } catch (IllegalArgumentException e) {
       // OK
     }
-    assertEquals(0, options.getEventBusOptions().getPort());
+    assertEquals(EventBusOptions.DEFAULT_CLUSTER_PORT, options.getEventBusOptions().getPort());
     options.getEventBusOptions().setPort(1234);
     assertEquals(1234, options.getEventBusOptions().getPort());
     try {
@@ -78,7 +79,7 @@ public class VertxOptionsTest extends VertxTestBase {
     } catch (IllegalArgumentException e) {
       // OK
     }
-    assertEquals(-1, options.getEventBusOptions().getClusterPublicPort());
+    assertEquals(EventBusOptions.DEFAULT_CLUSTER_PUBLIC_PORT, options.getEventBusOptions().getClusterPublicPort());
     options.getEventBusOptions().setClusterPublicPort(1234);
     assertEquals(1234, options.getEventBusOptions().getClusterPublicPort());
     try {
@@ -97,11 +98,13 @@ public class VertxOptionsTest extends VertxTestBase {
     String randString = TestUtils.randomUnicodeString(100);
     options.getEventBusOptions().setHost(randString);
     assertEquals(randString, options.getEventBusOptions().getHost());
+
     assertEquals(null, options.getEventBusOptions().getClusterPublicHost());
     randString = TestUtils.randomUnicodeString(100);
     options.getEventBusOptions().setClusterPublicHost(randString);
     assertEquals(randString, options.getEventBusOptions().getClusterPublicHost());
-    assertEquals(20000, options.getEventBusOptions().getClusterPingInterval());
+
+    assertEquals(EventBusOptions.DEFAULT_CLUSTER_PING_INTERVAL, options.getEventBusOptions().getClusterPingInterval());
     long randomLong = TestUtils.randomPositiveLong();
     options.getEventBusOptions().setClusterPingInterval(randomLong);
     assertEquals(randomLong, options.getEventBusOptions().getClusterPingInterval());
@@ -111,7 +114,7 @@ public class VertxOptionsTest extends VertxTestBase {
     } catch (IllegalArgumentException e) {
       assertEquals(randomLong, options.getEventBusOptions().getClusterPingInterval());
     }
-    assertEquals(20000, options.getEventBusOptions().getClusterPingReplyInterval());
+    assertEquals(EventBusOptions.DEFAULT_CLUSTER_PING_REPLY_INTERVAL, options.getEventBusOptions().getClusterPingReplyInterval());
     randomLong = TestUtils.randomPositiveLong();
     options.getEventBusOptions().setClusterPingReplyInterval(randomLong);
     assertEquals(randomLong, options.getEventBusOptions().getClusterPingReplyInterval());
@@ -121,7 +124,7 @@ public class VertxOptionsTest extends VertxTestBase {
     } catch (IllegalArgumentException e) {
       assertEquals(randomLong, options.getEventBusOptions().getClusterPingReplyInterval());
     }
-    assertEquals(1000, options.getBlockedThreadCheckInterval());
+    assertEquals(VertxOptions.DEFAULT_BLOCKED_THREAD_CHECK_INTERVAL, options.getBlockedThreadCheckInterval());
     rand = TestUtils.randomPositiveInt();
     assertEquals(options, options.setBlockedThreadCheckInterval(rand));
     assertEquals(rand, options.getBlockedThreadCheckInterval());
@@ -131,7 +134,7 @@ public class VertxOptionsTest extends VertxTestBase {
     } catch (IllegalArgumentException e) {
       // OK
     }
-    assertEquals(2000l * 1000000, options.getMaxEventLoopExecuteTime()); // 2 seconds in nano seconds
+    assertEquals(VertxOptions.DEFAULT_MAX_EVENT_LOOP_EXECUTE_TIME, options.getMaxEventLoopExecuteTime()); // 2 seconds in nano seconds
     rand = TestUtils.randomPositiveInt();
     assertEquals(options, options.setMaxEventLoopExecuteTime(rand));
     assertEquals(rand, options.getMaxEventLoopExecuteTime());
@@ -141,7 +144,7 @@ public class VertxOptionsTest extends VertxTestBase {
     } catch (IllegalArgumentException e) {
       // OK
     }
-    assertEquals(1l * 60 * 1000 * 1000000, options.getMaxWorkerExecuteTime()); // 1 minute in nano seconds
+    assertEquals(VertxOptions.DEFAULT_MAX_WORKER_EXECUTE_TIME, options.getMaxWorkerExecuteTime()); // 1 minute in nano seconds
     rand = TestUtils.randomPositiveInt();
     assertEquals(options, options.setMaxWorkerExecuteTime(rand));
     assertEquals(rand, options.getMaxWorkerExecuteTime());
@@ -151,6 +154,7 @@ public class VertxOptionsTest extends VertxTestBase {
     } catch (IllegalArgumentException e) {
       // OK
     }
+
     ClusterManager mgr = new FakeClusterManager();
     assertNull(options.getClusterManager());
     assertEquals(options, options.setClusterManager(mgr));
@@ -158,8 +162,9 @@ public class VertxOptionsTest extends VertxTestBase {
     assertFalse(options.isHAEnabled());
     assertEquals(options, options.setHAEnabled(true));
     assertTrue(options.isHAEnabled());
+
     rand = TestUtils.randomPositiveInt();
-    assertEquals(1, options.getQuorumSize());
+    assertEquals(VertxOptions.DEFAULT_QUORUM_SIZE, options.getQuorumSize());
     assertEquals(options, options.setQuorumSize(rand));
     assertEquals(rand, options.getQuorumSize());
     try {
@@ -174,11 +179,11 @@ public class VertxOptionsTest extends VertxTestBase {
     } catch (IllegalArgumentException e) {
       // OK
     }
+
     assertEquals(VertxOptions.DEFAULT_HA_GROUP, options.getHAGroup());
     randString = TestUtils.randomUnicodeString(100);
     assertEquals(options, options.setHAGroup(randString));
     assertEquals(randString, options.getHAGroup());
-
     try {
       options.setHAGroup(null);
       fail("Should throw exception");
@@ -193,8 +198,9 @@ public class VertxOptionsTest extends VertxTestBase {
     } catch (IllegalArgumentException e) {
       // OK
     }
-    assertEquals(options, options.setWarningExceptionTime(1000000000l));
-    assertEquals(1000000000l, options.getWarningExceptionTime());
+    long warningExceptionTime = 1000000000L;
+    assertEquals(options, options.setWarningExceptionTime(warningExceptionTime));
+    assertEquals(warningExceptionTime, options.getWarningExceptionTime());
 
     assertEquals(options, options.setMaxEventLoopExecuteTimeUnit(TimeUnit.SECONDS));
     assertEquals(TimeUnit.SECONDS, options.getMaxEventLoopExecuteTimeUnit());
@@ -250,10 +256,10 @@ public class VertxOptionsTest extends VertxTestBase {
     options.setQuorumSize(quorumSize);
     options.setHAGroup(haGroup);
     options.setMetricsOptions(
-        new MetricsOptions().
-            setEnabled(metricsEnabled));
+      new MetricsOptions().
+        setEnabled(metricsEnabled));
     options.setTracingOptions(
-        new TracingOptions().setFactory(new FakeTracerFactory())
+      new TracingOptions().setFactory(new FakeTracerFactory())
     );
     options.setWarningExceptionTime(warningExceptionTime);
     options.setMaxEventLoopExecuteTimeUnit(maxEventLoopExecuteTimeUnit);
@@ -381,38 +387,38 @@ public class VertxOptionsTest extends VertxTestBase {
     TimeUnit blockedThreadCheckIntervalUnit = TimeUnit.MINUTES;
     boolean useDaemonThread = rand.nextBoolean();
     options = new VertxOptions(new JsonObject().
-        put("eventBusOptions", new JsonObject().
-          put("port", clusterPort).
-          put("clusterPublicPort", clusterPublicPort).
-          put("host", clusterHost).
-          put("clusterPublicHost", clusterPublicHost).
-          put("clusterPingInterval", clusterPingInterval).
-          put("clusterPingReplyInterval", clusterPingReplyInterval)).
-        put("eventLoopPoolSize", eventLoopPoolSize).
-        put("internalBlockingPoolSize", internalBlockingPoolSize).
-        put("workerPoolSize", workerPoolSize).
-        put("blockedThreadCheckInterval", blockedThreadCheckInterval).
-        put("maxEventLoopExecuteTime", maxEventLoopExecuteTime).
-        put("maxWorkerExecuteTime", maxWorkerExecuteTime).
-        put("proxyOperationTimeout", proxyOperationTimeout).
-        put("haEnabled", haEnabled).
-        put("fileResolverCachingEnabled", fileResolverCachingEnabled).
-        put("quorumSize", quorumSize).
-        put("haGroup", haGroup).
-        put("warningExceptionTime", warningExceptionTime).
-        put("fileSystemOptions", new JsonObject().
-            put("classPathResolvingEnabled", classPathResolvingEnabled).
-            put("fileCachingEnabled", fileResolverCachingEnabled)).
-        put("metricsOptions", new JsonObject().
-            put("enabled", metricsEnabled).
-            put("jmxEnabled", jmxEnabled).
-            put("jmxDomain", jmxDomain)).
-        put("tracingOptions", new JsonObject()).
-        put("maxEventLoopExecuteTimeUnit", maxEventLoopExecuteTimeUnit).
-        put("maxWorkerExecuteTimeUnit", maxWorkerExecuteTimeUnit).
-        put("warningExceptionTimeUnit", warningExceptionTimeUnit).
-        put("blockedThreadCheckIntervalUnit", blockedThreadCheckIntervalUnit).
-        put("useDaemonThread", useDaemonThread)
+      put("eventBusOptions", new JsonObject().
+        put("port", clusterPort).
+        put("clusterPublicPort", clusterPublicPort).
+        put("host", clusterHost).
+        put("clusterPublicHost", clusterPublicHost).
+        put("clusterPingInterval", clusterPingInterval).
+        put("clusterPingReplyInterval", clusterPingReplyInterval)).
+      put("eventLoopPoolSize", eventLoopPoolSize).
+      put("internalBlockingPoolSize", internalBlockingPoolSize).
+      put("workerPoolSize", workerPoolSize).
+      put("blockedThreadCheckInterval", blockedThreadCheckInterval).
+      put("maxEventLoopExecuteTime", maxEventLoopExecuteTime).
+      put("maxWorkerExecuteTime", maxWorkerExecuteTime).
+      put("proxyOperationTimeout", proxyOperationTimeout).
+      put("haEnabled", haEnabled).
+      put("fileResolverCachingEnabled", fileResolverCachingEnabled).
+      put("quorumSize", quorumSize).
+      put("haGroup", haGroup).
+      put("warningExceptionTime", warningExceptionTime).
+      put("fileSystemOptions", new JsonObject().
+        put("classPathResolvingEnabled", classPathResolvingEnabled).
+        put("fileCachingEnabled", fileResolverCachingEnabled)).
+      put("metricsOptions", new JsonObject().
+        put("enabled", metricsEnabled).
+        put("jmxEnabled", jmxEnabled).
+        put("jmxDomain", jmxDomain)).
+      put("tracingOptions", new JsonObject()).
+      put("maxEventLoopExecuteTimeUnit", maxEventLoopExecuteTimeUnit).
+      put("maxWorkerExecuteTimeUnit", maxWorkerExecuteTimeUnit).
+      put("warningExceptionTimeUnit", warningExceptionTimeUnit).
+      put("blockedThreadCheckIntervalUnit", blockedThreadCheckIntervalUnit).
+      put("useDaemonThread", useDaemonThread)
     );
     assertEquals(clusterPort, options.getEventBusOptions().getPort());
     assertEquals(clusterPublicPort, options.getEventBusOptions().getClusterPublicPort());

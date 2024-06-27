@@ -11,24 +11,31 @@ public class VertxBuilderTest extends AsyncTestBase {
   @Test
   public void testBuildVertx() {
     Vertx vertx = Vertx.builder().build();
-    vertx.setTimer(10, id -> {
+    vertx.close(ar -> {
       testComplete();
     });
     await();
-    vertx.close();
   }
 
   @Test
   public void testTracerFactoryDoesNotRequireOptions() {
     FakeTracer tracer = new FakeTracer();
     Vertx vertx = Vertx.builder().withTracer(options -> tracer).build();
-    assertEquals(tracer, ((VertxInternal)vertx).tracer());
+    assertEquals(tracer, ((VertxInternal) vertx).tracer());
+    vertx.close(ar -> {
+      testComplete();
+    });
+    await();
   }
 
   @Test
   public void testMetricsFactoryDoesNotRequireOptions() {
     FakeVertxMetrics metrics = new FakeVertxMetrics();
     Vertx vertx = Vertx.builder().withMetrics(options -> metrics).build();
-    assertEquals(metrics, ((VertxInternal)vertx).metricsSPI());
+    assertEquals(metrics, ((VertxInternal) vertx).metricsSPI());
+    vertx.close(ar -> {
+      testComplete();
+    });
+    await();
   }
 }
